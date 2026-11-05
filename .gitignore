@@ -1,0 +1,13 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Maven
+target/
+
+# Arsip project hasil unduhan Spring Initializr
+*.zip
+
+# macOS
+.DS_Store
