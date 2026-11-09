@@ -73,6 +73,13 @@ public class AnalyzerController {
         return BaseResponse.ok(charAnalysisService.simpan(request));
     }
 
+    @GetMapping("/{id}")
+    public BaseResponse<CharAnalysisResponse> detail(@PathVariable Long id) {
+        CharAnalysisResponse data = charAnalysisService.findById(id);
+        if (data == null) {
+            return BaseResponse.error("Data with id : " + id + " not found");
+        }
+        return BaseResponse.ok(data);
+    }
 
-    //Post /find
 }

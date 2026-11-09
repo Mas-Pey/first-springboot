@@ -8,4 +8,5 @@ import java.util.List;
 public interface CharAnalysisService {
     List<CharAnalysisResponse> cari(String kata);
     CharAnalysisResponse simpan(CharAnalysisRequest request);
+    CharAnalysisResponse findById(Long id);
 }

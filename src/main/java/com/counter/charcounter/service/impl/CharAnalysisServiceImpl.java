@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -52,5 +53,14 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         CharAnalysis saved = charAnalysisRepository.save(data);
 
         return CharAnalysisResponse.from(saved, counter.toMap());
+    }
+
+    @Override
+    public CharAnalysisResponse findById(Long id) {
+        Optional<CharAnalysis> data = charAnalysisRepository.findById(id);
+        if (data.isEmpty()) {
+            return null;
+        }
+        return toResponse(data.get());
     }
 }
