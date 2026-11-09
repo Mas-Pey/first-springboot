@@ -63,4 +63,14 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         }
         return toResponse(data.get());
     }
+
+    @Override
+    public List<CharAnalysisResponse> findWithMinimal(int min) {
+        List<CharAnalysis> data = charAnalysisRepository.findbyMinimalHuruf(min);
+        List<CharAnalysisResponse> result = new ArrayList<>();
+        for (CharAnalysis d : data) {
+            result.add(toResponse(d));
+        }
+        return result;
+    }
 }

@@ -82,4 +82,8 @@ public class AnalyzerController {
         return BaseResponse.ok(data);
     }
 
+    @GetMapping("/minimal")
+    public BaseResponse<List<CharAnalysisResponse>> minimal(@RequestParam int min) {
+        return BaseResponse.ok(charAnalysisService.findWithMinimal(min));
+    }
 }
