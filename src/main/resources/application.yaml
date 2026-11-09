@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: charcounter
+  datasource:
+    url: jdbc:postgresql://port/dbname
+    username: dbuser
+    password: dbpassword
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8081
