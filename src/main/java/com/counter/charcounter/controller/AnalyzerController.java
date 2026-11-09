@@ -1,5 +1,6 @@
 package com.counter.charcounter.controller;
 
+import com.counter.charcounter.dto.request.CharAnalysisRequest;
 import com.counter.charcounter.dto.response.BaseResponse;
 import com.counter.charcounter.dto.response.CharAnalysisResponse;
 import com.counter.charcounter.service.CharAnalysisService;
@@ -15,7 +16,7 @@ import java.util.TreeMap;
 
 // Rest : HTTP, berbeda dengan only @Controller: output html
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AnalyzerController {
 
@@ -63,6 +64,15 @@ public class AnalyzerController {
     public BaseResponse<List<CharAnalysisResponse>> cari(@RequestParam(required = false) String kalimat) {
         return BaseResponse.ok(charAnalysisService.cari(kalimat));
     }
+
+    @PostMapping()
+    public BaseResponse<CharAnalysisResponse> simpan(
+            @RequestHeader(value = "X-Request-Id", required = false) String requestId,
+            @RequestBody CharAnalysisRequest request) {
+        System.out.println("X-Request-Id: " + requestId + ", Kalimat: " + request.getKalimat());
+        return BaseResponse.ok(charAnalysisService.simpan(request));
+    }
+
 
     //Post /find
 }
