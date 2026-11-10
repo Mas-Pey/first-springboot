@@ -53,21 +53,7 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
 
     @Override
     public CharAnalysisResponse simpan(CharAnalysisRequest request) {
-        String kalimat = request.getKalimat().trim();
-        boolean isAlready = charAnalysisRepository.existsByKalimatIgnoreCase(kalimat);
-        if (isAlready) {
-            throw new AlreadyExistException(request.getKalimat());
-        }
-
-//        CharAnalysis data = new CharAnalysis();
-//        CharCounter counter = new CharCounter(request.getKalimat());
-//        data.setKalimat(request.getKalimat());
-//        data.setTotalHuruf(counter.getTotalHuruf());
-//        data.setCreatedAt(LocalDateTime.now());
-//
-//        CharAnalysis saved = charAnalysisRepository.save(data);
-
-        return simpanPrivate(kalimat);
+        return simpanData(request.getKalimat(), null);
     }
 
     @Override
@@ -105,14 +91,21 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         } catch (FeignException feignException) {
             throw new QuoteUnavailableException();
         }
-        return simpanPrivate(quote.getQuote());
+        return simpanData(quote.getQuote(), quote.getAuthor());
     }
 
-    private CharAnalysisResponse simpanPrivate(String kalimat) {
+    private CharAnalysisResponse simpanData(String kalimat, String author) {
+        kalimat = kalimat.trim();
+        boolean isAlready = charAnalysisRepository.existsByKalimatIgnoreCase(kalimat);
+        if (isAlready) {
+            throw new AlreadyExistException(kalimat);
+        }
+
         CharCounter counter = new CharCounter(kalimat);
         CharAnalysis data = new CharAnalysis();
 
         data.setKalimat(kalimat);
+        data.setAuthor(author);
         data.setTotalHuruf(counter.getTotalHuruf());
         data.setCreatedAt(LocalDateTime.now());
 
