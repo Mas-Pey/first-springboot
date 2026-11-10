@@ -10,4 +10,5 @@ public interface CharAnalysisService {
     CharAnalysisResponse simpan(CharAnalysisRequest request);
     CharAnalysisResponse findById(Long id);
     List<CharAnalysisResponse> findWithMinimal(int min);
+    List<CharAnalysisResponse> findNew();
 }

@@ -86,4 +86,9 @@ public class AnalyzerController {
     public BaseResponse<List<CharAnalysisResponse>> minimal(@RequestParam int min) {
         return BaseResponse.ok(charAnalysisService.findWithMinimal(min));
     }
+
+    @GetMapping("/terbaru")
+    public BaseResponse<List<CharAnalysisResponse>> terbaru() {
+        return BaseResponse.ok(charAnalysisService.findNew());
+    }
 }

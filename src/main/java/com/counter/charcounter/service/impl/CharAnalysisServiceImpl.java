@@ -73,4 +73,14 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         }
         return result;
     }
+
+    @Override
+    public List<CharAnalysisResponse> findNew() {
+        List<CharAnalysis> data = charAnalysisRepository.findNew();
+        List<CharAnalysisResponse> result = new ArrayList<>();
+        for (CharAnalysis d : data) {
+            result.add(toResponse(d));
+        }
+        return result;
+    }
 }

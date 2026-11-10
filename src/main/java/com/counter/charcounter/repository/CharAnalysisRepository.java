@@ -10,4 +10,5 @@ import java.util.List;
 public interface CharAnalysisRepository extends JpaRepository<CharAnalysis, Long> {
     List<CharAnalysis> findByKalimatContainingIgnoreCase(String kata);
     @Query("select c from CharAnalysis c where c.totalHuruf >= :min") List<CharAnalysis> findbyMinimalHuruf(@Param("min") int min);
+    @Query(nativeQuery = true, value = "select * from mst_char_analysis ORDER BY created_at DESC LIMIT 5") List<CharAnalysis> findNew();
 }
