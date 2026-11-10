@@ -4,6 +4,7 @@ import com.example.demo.dto.request.CharAnalysisRequest;
 import com.example.demo.dto.response.BaseResponse;
 import com.example.demo.dto.response.CharAnalysisResponse;
 import com.example.demo.service.CharAnalysisService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class AnalyzerController {
 
     @PostMapping
     public BaseResponse<CharAnalysisResponse> analisis(
+            @Valid
             @RequestBody CharAnalysisRequest request,
             @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
         log.info("X-Request-Id: {}, kalimat: {}", requestId, request.getKalimat());
@@ -47,5 +49,10 @@ public class AnalyzerController {
     @GetMapping("/terbaru")
     public BaseResponse<List<CharAnalysisResponse>> terbaru() {
         return BaseResponse.ok(charAnalysisService.limaTerbaru());
+    }
+
+    @PostMapping("/from-quote")
+    public BaseResponse<CharAnalysisResponse> fromQuote() {
+        return BaseResponse.ok(charAnalysisService.analisisDariQuote());
     }
 }
