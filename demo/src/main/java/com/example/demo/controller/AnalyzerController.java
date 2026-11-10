@@ -57,11 +57,6 @@ public class AnalyzerController {
         return BaseResponse.ok(charAnalysisService.analisisDariQuote());
     }
 
-    @PostMapping("/from-quote/dua")
-    public BaseResponse<List<CharAnalysisResponse>> fromDuaQuote() {
-        return BaseResponse.ok(charAnalysisService.analisisDuaQuote());
-    }
-
     @PostMapping("/from-quote/{id}")
     public BaseResponse<CharAnalysisResponse> fromQuoteById(@PathVariable Long id) {
         return BaseResponse.ok(charAnalysisService.analysisQuoteById(id));

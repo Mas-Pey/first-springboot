@@ -19,7 +19,6 @@ public interface CharAnalysisService {
 
     CharAnalysisResponse analisisDariQuote();
 
-    List<CharAnalysisResponse> analisisDuaQuote();
 
     CharAnalysisResponse analysisQuoteById(Long id);
 
