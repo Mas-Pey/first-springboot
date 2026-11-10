@@ -11,4 +11,7 @@ public interface CharAnalysisService {
     CharAnalysisResponse findById(Long id);
     List<CharAnalysisResponse> findWithMinimal(int min);
     List<CharAnalysisResponse> findNew();
+
+    // EXTERNAL API / REST
+    CharAnalysisResponse analyzeFromQuote();
 }

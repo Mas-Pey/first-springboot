@@ -1,13 +1,20 @@
 package com.counter.charcounter.service.impl;
 
+import com.counter.charcounter.dto.feign.QuoteResponse;
 import com.counter.charcounter.dto.request.CharAnalysisRequest;
 import com.counter.charcounter.dto.response.CharAnalysisResponse;
 import com.counter.charcounter.entity.CharAnalysis;
+import com.counter.charcounter.exception.AlreadyExistException;
+import com.counter.charcounter.exception.AnalysisNotFoundException;
+import com.counter.charcounter.exception.QuoteUnavailableException;
 import com.counter.charcounter.repository.CharAnalysisRepository;
+import com.counter.charcounter.rest.QuoteClient;
 import com.counter.charcounter.service.CharAnalysisService;
 import com.counter.charcounter.util.CharCounter;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.http.converter.autoconfigure.ClientHttpMessageConvertersCustomizer;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,10 +27,13 @@ import java.util.Optional;
 public class CharAnalysisServiceImpl implements CharAnalysisService {
 
     private final CharAnalysisRepository charAnalysisRepository;
+    private final ClientHttpMessageConvertersCustomizer clientConvertersCustomizer;
+
     private CharAnalysisResponse toResponse (CharAnalysis data) {
         CharCounter counter = new CharCounter(data.getKalimat());
         return CharAnalysisResponse.from(data, counter.toMap());
     }
+    private final QuoteClient quoteClient;
 
     @Override
     public List<CharAnalysisResponse> cari(String kata) {
@@ -43,25 +53,28 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
 
     @Override
     public CharAnalysisResponse simpan(CharAnalysisRequest request) {
-        CharCounter counter = new CharCounter(request.getKalimat());
+        String kalimat = request.getKalimat().trim();
+        boolean isAlready = charAnalysisRepository.existsByKalimatIgnoreCase(kalimat);
+        if (isAlready) {
+            throw new AlreadyExistException(request.getKalimat());
+        }
 
-        CharAnalysis data = new CharAnalysis();
-        data.setKalimat(request.getKalimat());
-        data.setTotalHuruf(counter.getTotalHuruf());
-        data.setCreatedAt(LocalDateTime.now());
+//        CharAnalysis data = new CharAnalysis();
+//        CharCounter counter = new CharCounter(request.getKalimat());
+//        data.setKalimat(request.getKalimat());
+//        data.setTotalHuruf(counter.getTotalHuruf());
+//        data.setCreatedAt(LocalDateTime.now());
+//
+//        CharAnalysis saved = charAnalysisRepository.save(data);
 
-        CharAnalysis saved = charAnalysisRepository.save(data);
-
-        return CharAnalysisResponse.from(saved, counter.toMap());
+        return simpanPrivate(kalimat);
     }
 
     @Override
     public CharAnalysisResponse findById(Long id) {
-        Optional<CharAnalysis> data = charAnalysisRepository.findById(id);
-        if (data.isEmpty()) {
-            return null;
-        }
-        return toResponse(data.get());
+        CharAnalysis data = charAnalysisRepository.findById(id)
+                .orElseThrow(() -> new AnalysisNotFoundException(id));
+        return toResponse(data);
     }
 
     @Override
@@ -82,5 +95,29 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
             result.add(toResponse(d));
         }
         return result;
+    }
+
+    @Override
+    public CharAnalysisResponse analyzeFromQuote() {
+        QuoteResponse quote;
+        try {
+            quote = quoteClient.getQuote();
+        } catch (FeignException feignException) {
+            throw new QuoteUnavailableException();
+        }
+        return simpanPrivate(quote.getQuote());
+    }
+
+    private CharAnalysisResponse simpanPrivate(String kalimat) {
+        CharCounter counter = new CharCounter(kalimat);
+        CharAnalysis data = new CharAnalysis();
+
+        data.setKalimat(kalimat);
+        data.setTotalHuruf(counter.getTotalHuruf());
+        data.setCreatedAt(LocalDateTime.now());
+
+        CharAnalysis saved = charAnalysisRepository.save(data);
+
+        return CharAnalysisResponse.from(saved, counter.toMap());
     }
 }

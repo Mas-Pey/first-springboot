@@ -1,10 +1,12 @@
 package com.counter.charcounter.controller;
 
+import com.counter.charcounter.dto.feign.QuoteResponse;
 import com.counter.charcounter.dto.request.CharAnalysisRequest;
 import com.counter.charcounter.dto.response.BaseResponse;
 import com.counter.charcounter.dto.response.CharAnalysisResponse;
 import com.counter.charcounter.service.CharAnalysisService;
 import com.counter.charcounter.util.CharCounter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -65,10 +67,10 @@ public class AnalyzerController {
         return BaseResponse.ok(charAnalysisService.cari(kalimat));
     }
 
-    @PostMapping()
+    @PostMapping
     public BaseResponse<CharAnalysisResponse> simpan(
             @RequestHeader(value = "X-Request-Id", required = false) String requestId,
-            @RequestBody CharAnalysisRequest request) {
+            @Valid @RequestBody CharAnalysisRequest request) {
         System.out.println("X-Request-Id: " + requestId + ", Kalimat: " + request.getKalimat());
         return BaseResponse.ok(charAnalysisService.simpan(request));
     }
@@ -76,9 +78,9 @@ public class AnalyzerController {
     @GetMapping("/{id}")
     public BaseResponse<CharAnalysisResponse> detail(@PathVariable Long id) {
         CharAnalysisResponse data = charAnalysisService.findById(id);
-        if (data == null) {
-            return BaseResponse.error("Data with id : " + id + " not found");
-        }
+//        if (data == null) {
+//            return BaseResponse.error("Data with id : " + id + " not found");
+//        }
         return BaseResponse.ok(data);
     }
 
@@ -90,5 +92,10 @@ public class AnalyzerController {
     @GetMapping("/terbaru")
     public BaseResponse<List<CharAnalysisResponse>> terbaru() {
         return BaseResponse.ok(charAnalysisService.findNew());
+    }
+
+    @PostMapping("/from-quote")
+    public BaseResponse<CharAnalysisResponse> quote() {
+        return BaseResponse.ok(charAnalysisService.analyzeFromQuote());
     }
 }
