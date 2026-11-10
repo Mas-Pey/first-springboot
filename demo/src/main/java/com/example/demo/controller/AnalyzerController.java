@@ -55,4 +55,9 @@ public class AnalyzerController {
     public BaseResponse<CharAnalysisResponse> fromQuote() {
         return BaseResponse.ok(charAnalysisService.analisisDariQuote());
     }
+
+    @PostMapping("/from-quote/dua")
+    public BaseResponse<List<CharAnalysisResponse>> fromDuaQuote() {
+        return BaseResponse.ok(charAnalysisService.analisisDuaQuote());
+    }
 }

@@ -10,22 +10,30 @@ import com.example.demo.exception.QuoteUnavailableException;
 import com.example.demo.repository.CharAnalysisRepository;
 import com.example.demo.rest.QuoteClient;
 import com.example.demo.service.CharAnalysisService;
+import com.example.demo.service.QuoteAsyncService;
+import com.example.demo.service.RiwayatService;
 import com.example.demo.util.CharCounter;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__( @Autowired))
 public class CharAnalysisServiceImpl implements CharAnalysisService {
 
     private final QuoteClient client;
     private final CharAnalysisRepository charAnalysisRepository;
+    private final RiwayatService riwayatService;
+    private final QuoteAsyncService quoteAsyncService;
 
     @Override
     public List<CharAnalysisResponse> cari(String kata) {
@@ -81,6 +89,28 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         return simpan(quote.getQuote());
     }
 
+    @Override
+    public List<CharAnalysisResponse> analisisDuaQuote() {
+        long mulai = System.currentTimeMillis();
+
+        // dua request ke DummyJSON dikirim bersamaan, tidak saling menunggu
+        CompletableFuture<QuoteResponse> quote1 = quoteAsyncService.ambilQuote();
+        CompletableFuture<QuoteResponse> quote2 = quoteAsyncService.ambilQuote();
+
+        List<CharAnalysisResponse> hasil = new ArrayList<>();
+        try {
+            // join() = tunggu sampai hasilnya datang
+            hasil.add(simpan(quote1.join().getQuote()));
+            hasil.add(simpan(quote2.join().getQuote()));
+        } catch (CompletionException e) {
+            throw new QuoteUnavailableException("Service unavailable");
+        }
+
+        log.info("[{}] dua quote selesai dalam {} ms",
+                Thread.currentThread().getName(), System.currentTimeMillis() - mulai);
+        return hasil;
+    }
+
     private CharAnalysisResponse simpan(String kalimat) {
         CharCounter counter = new CharCounter(kalimat);
         CharAnalysis data = new CharAnalysis();
@@ -89,6 +119,9 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         data.setTotalHuruf(counter.getTotalHuruf());
         data.setCreatedAt(LocalDateTime.now());
         charAnalysisRepository.save(data);
+
+        riwayatService.catatRiwayat(data.getId(), kalimat);   // @Async: tidak ditunggu
+        log.info("[{}] response dikirim ke client", Thread.currentThread().getName());
 
         return CharAnalysisResponse.from(data, counter.toMap());
     }

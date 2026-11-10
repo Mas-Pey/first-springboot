@@ -17,4 +17,6 @@ public interface CharAnalysisService {
     List<CharAnalysisResponse> limaTerbaru();
 
     CharAnalysisResponse analisisDariQuote();
+
+    List<CharAnalysisResponse> analisisDuaQuote();
 }
