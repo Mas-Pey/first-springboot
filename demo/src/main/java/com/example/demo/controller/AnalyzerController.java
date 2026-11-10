@@ -36,9 +36,6 @@ public class AnalyzerController {
     @GetMapping("/{id}")
     public BaseResponse<CharAnalysisResponse> detail(@PathVariable Long id) {
         CharAnalysisResponse hasil = charAnalysisService.cariById(id);
-        if (hasil == null) {
-            return BaseResponse.error("Data dengan id " + id + " tidak ditemukan");
-        }
         return BaseResponse.ok(hasil);
     }
 

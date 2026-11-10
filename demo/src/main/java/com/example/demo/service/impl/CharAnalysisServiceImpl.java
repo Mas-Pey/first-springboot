@@ -3,6 +3,8 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.request.CharAnalysisRequest;
 import com.example.demo.dto.response.CharAnalysisResponse;
 import com.example.demo.entity.CharAnalysis;
+import com.example.demo.exception.AnalysisAlreadyExistException;
+import com.example.demo.exception.AnalysisNotFoundException;
 import com.example.demo.repository.CharAnalysisRepository;
 import com.example.demo.service.CharAnalysisService;
 import com.example.demo.util.CharCounter;
@@ -39,10 +41,15 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
 
     @Override
     public CharAnalysisResponse analisis(CharAnalysisRequest request) {
-        CharCounter counter = new CharCounter(request.getKalimat());
+        String kalimat = request.getKalimat().trim();
+        if (charAnalysisRepository.existsByKalimatIgnoreCase(kalimat)) {
+            throw new AnalysisAlreadyExistException(kalimat);
+        }
 
+        CharCounter counter = new CharCounter(kalimat);
         CharAnalysis data = new CharAnalysis();
-        data.setKalimat(request.getKalimat());
+
+        data.setKalimat(kalimat);
         data.setTotalHuruf(counter.getTotalHuruf());
         data.setCreatedAt(LocalDateTime.now());
         charAnalysisRepository.save(data);
@@ -52,11 +59,9 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
 
     @Override
     public CharAnalysisResponse cariById(Long id) {
-        Optional<CharAnalysis> data = charAnalysisRepository.findById(id);
-        if (data.isEmpty()) {
-            return null;
-        }
-        return toResponse(data.get());
+        CharAnalysis data = charAnalysisRepository.findById(id)
+                .orElseThrow(() -> new AnalysisNotFoundException(id));
+        return toResponse(data);
     }
 
     @Override
