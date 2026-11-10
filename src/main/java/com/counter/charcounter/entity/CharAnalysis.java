@@ -17,7 +17,7 @@ public class CharAnalysis {
     @Column(nullable = false, length = 500)
     private String kalimat;
 
-    @Column
+    @Column(length = 100)
     private String author;
 
     @Column(name = "total_huruf")

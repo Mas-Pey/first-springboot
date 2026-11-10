@@ -98,4 +98,9 @@ public class AnalyzerController {
     public BaseResponse<CharAnalysisResponse> quote() {
         return BaseResponse.ok(charAnalysisService.analyzeFromQuote());
     }
+
+    @PostMapping("/from-quote/{id}")
+    public BaseResponse<CharAnalysisResponse> quoteById(@PathVariable Long id) {
+        return BaseResponse.ok(charAnalysisService.analyzeFromQuoteById(id));
+    }
 }

@@ -94,6 +94,19 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         return simpanData(quote.getQuote(), quote.getAuthor());
     }
 
+    @Override
+    public CharAnalysisResponse analyzeFromQuoteById(Long id) {
+        QuoteResponse quote;
+        try {
+            quote = quoteClient.quoteById(id);
+        } catch (FeignException.NotFound notFoundException) {
+            throw new AnalysisNotFoundException(id);
+        } catch (FeignException feignException) {
+            throw new QuoteUnavailableException();
+        }
+        return simpanData(quote.getQuote(), quote.getAuthor());
+    }
+
     private CharAnalysisResponse simpanData(String kalimat, String author) {
         kalimat = kalimat.trim();
         boolean isAlready = charAnalysisRepository.existsByKalimatIgnoreCase(kalimat);
