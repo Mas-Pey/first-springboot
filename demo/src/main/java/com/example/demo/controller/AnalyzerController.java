@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.request.CharAnalysisRequest;
 import com.example.demo.dto.response.BaseResponse;
 import com.example.demo.dto.response.CharAnalysisResponse;
+import com.example.demo.dto.response.QuotePageAnalysisResponse;
 import com.example.demo.service.CharAnalysisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +60,22 @@ public class AnalyzerController {
     @PostMapping("/from-quote/dua")
     public BaseResponse<List<CharAnalysisResponse>> fromDuaQuote() {
         return BaseResponse.ok(charAnalysisService.analisisDuaQuote());
+    }
+
+    @PostMapping("/from-quote/{id}")
+    public BaseResponse<CharAnalysisResponse> fromQuoteById(@PathVariable Long id) {
+        return BaseResponse.ok(charAnalysisService.analysisQuoteById(id));
+    }
+
+    @PostMapping("/from-quote/batch/{jumlah}")
+    public BaseResponse<List<CharAnalysisResponse>> fromBanyakQuote(@PathVariable int jumlah) {
+        return BaseResponse.ok(charAnalysisService.analisisBanyakQuote(jumlah));
+    }
+
+    @PostMapping("/from-quote/page")
+    public BaseResponse<QuotePageAnalysisResponse> fromHalamanQuote(
+            @RequestParam(defaultValue = "5") int limit,
+            @RequestParam(defaultValue = "0") int skip) {
+        return BaseResponse.ok(charAnalysisService.analisisHalamanQuote(limit, skip));
     }
 }

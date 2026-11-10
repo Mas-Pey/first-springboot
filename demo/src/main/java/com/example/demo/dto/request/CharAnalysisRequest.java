@@ -8,6 +8,6 @@ import lombok.Data;
 public class CharAnalysisRequest {
 
     @NotBlank(message = "Kalimat wajib isi")
-    @Size(max = 255, message = "Kalimat wajib isi sampai 255 character")
+    @Size(max = 500, message = "Kalimat wajib isi sampai 500 character")
     private String kalimat;
 }

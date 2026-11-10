@@ -1,12 +1,12 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.feign.QuoteListResponse;
 import com.example.demo.dto.feign.QuoteResponse;
 import com.example.demo.dto.request.CharAnalysisRequest;
 import com.example.demo.dto.response.CharAnalysisResponse;
+import com.example.demo.dto.response.QuotePageAnalysisResponse;
 import com.example.demo.entity.CharAnalysis;
-import com.example.demo.exception.AnalysisAlreadyExistException;
-import com.example.demo.exception.AnalysisNotFoundException;
-import com.example.demo.exception.QuoteUnavailableException;
+import com.example.demo.exception.*;
 import com.example.demo.repository.CharAnalysisRepository;
 import com.example.demo.rest.QuoteClient;
 import com.example.demo.service.CharAnalysisService;
@@ -58,7 +58,7 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
             throw new AnalysisAlreadyExistException(kalimat);
         }
 
-        return simpan(kalimat);
+        return simpan(kalimat, null);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         } catch (FeignException feignException) {
             throw new QuoteUnavailableException("Service unavailable");
         }
-        return simpan(quote.getQuote());
+        return simpan(quote.getQuote(), quote.getAuthor());
     }
 
     @Override
@@ -99,9 +99,11 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
 
         List<CharAnalysisResponse> hasil = new ArrayList<>();
         try {
+            QuoteResponse q1 = quote1.join();
+            QuoteResponse q2 = quote2.join();
             // join() = tunggu sampai hasilnya datang
-            hasil.add(simpan(quote1.join().getQuote()));
-            hasil.add(simpan(quote2.join().getQuote()));
+            hasil.add(simpan(q1.getQuote(), q1.getAuthor()));
+            hasil.add(simpan(q2.getQuote(), q2.getAuthor()));
         } catch (CompletionException e) {
             throw new QuoteUnavailableException("Service unavailable");
         }
@@ -111,16 +113,82 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         return hasil;
     }
 
-    private CharAnalysisResponse simpan(String kalimat) {
+    @Override
+    public CharAnalysisResponse analysisQuoteById(Long id) {
+        QuoteResponse quoteResponse;
+        try {
+            quoteResponse = client.getQuoteById(id);
+        } catch (FeignException.NotFound feignException) {
+            throw new QuoteNotFoundException(id);
+        } catch (FeignException feignException) {
+            throw new QuoteUnavailableException("Service unavailable");
+        }
+        log.info("Quote id={}: {} - {}", id, quoteResponse.getQuote(), quoteResponse.getAuthor());
+
+        if (charAnalysisRepository.existsByKalimatIgnoreCase(quoteResponse.getQuote())) {
+            throw new AnalysisAlreadyExistException(quoteResponse.getQuote());
+        }
+        return simpan(quoteResponse.getQuote(), quoteResponse.getAuthor());
+    }
+
+    @Override
+    public List<CharAnalysisResponse> analisisBanyakQuote(int jumlah) {
+        if (jumlah < 1 || jumlah > 10) {
+            throw new InvalidJumlahException();
+        }
+
+        List<QuoteResponse> quotes;
+        try {
+            quotes = client.getRandomQuotes(jumlah);
+        } catch (FeignException e) {
+            throw new QuoteUnavailableException("Service unavailable");
+        }
+
+        List<CharAnalysisResponse> hasil = new ArrayList<>();
+        for (QuoteResponse quote : quotes) {
+            hasil.add(simpan(quote.getQuote(), quote.getAuthor()));
+        }
+        log.info("{} quote berhasil disimpan", hasil.size());
+        return hasil;
+    }
+
+    @Override
+    public QuotePageAnalysisResponse analisisHalamanQuote(int limit, int skip) {
+        if (limit < 1 || limit > 20) {
+            throw new InvalidPageException("Limit harus 1 sampai 20");
+        }
+        if (skip < 0) {
+            throw new InvalidPageException("Skip tidak boleh negatif");
+        }
+
+        QuoteListResponse halaman;
+        try {
+            halaman = client.getQuotes(limit, skip);
+        } catch (FeignException e) {
+            throw new QuoteUnavailableException("Service unavailable");
+        }
+
+        List<CharAnalysisResponse> hasil = new ArrayList<>();
+        for (QuoteResponse quote : halaman.getQuotes()) {
+            hasil.add(simpan(quote.getQuote(), quote.getAuthor()));
+        }
+        log.info("Halaman skip={} limit={}: {} quote disimpan", skip, limit, hasil.size());
+
+        return new QuotePageAnalysisResponse(halaman.getTotal(), halaman.getSkip(), halaman.getLimit(), hasil);
+
+    }
+
+    private CharAnalysisResponse simpan(String kalimat, String author) {
         CharCounter counter = new CharCounter(kalimat);
         CharAnalysis data = new CharAnalysis();
 
         data.setKalimat(kalimat);
+        data.setAuthor(author);
         data.setTotalHuruf(counter.getTotalHuruf());
         data.setCreatedAt(LocalDateTime.now());
         charAnalysisRepository.save(data);
 
-        riwayatService.catatRiwayat(data.getId(), kalimat);   // @Async: tidak ditunggu
+        riwayatService.catatRiwayat(data.getId(), kalimat);
         log.info("[{}] response dikirim ke client", Thread.currentThread().getName());
 
         return CharAnalysisResponse.from(data, counter.toMap());

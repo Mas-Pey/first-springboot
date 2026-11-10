@@ -16,6 +16,21 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(InvalidPageException.class)
+    public ResponseEntity<BaseResponse<Object>> handleInvalidPage(InvalidPageException exception) {
+        return build(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidJumlahException.class)
+    public ResponseEntity<BaseResponse<Object>> handleInvalidJumlah(InvalidJumlahException exception) {
+        return build(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(QuoteNotFoundException.class)
+    public ResponseEntity<BaseResponse<Object>> handleQuoteNotFound(QuoteNotFoundException exception) {
+        return build(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
     @ExceptionHandler(QuoteUnavailableException.class)
     public ResponseEntity<BaseResponse<Object>> handleQuoteUnavailableException(QuoteUnavailableException quoteUnavailableException) {
         log.info("QuoteUnavailableException: {}", quoteUnavailableException.getMessage());
