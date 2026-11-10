@@ -15,4 +15,5 @@ public interface CharAnalysisService {
     // EXTERNAL API / REST
     CharAnalysisResponse analyzeFromQuote();
     CharAnalysisResponse analyzeFromQuoteById(Long id);
+    List<CharAnalysisResponse> analyzeFromRandomQuoteBatch(int length);
 }

@@ -7,9 +7,12 @@ import com.counter.charcounter.dto.response.CharAnalysisResponse;
 import com.counter.charcounter.service.CharAnalysisService;
 import com.counter.charcounter.util.CharCounter;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 // Rest : HTTP, berbeda dengan only @Controller: output html
+@Validated
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -102,5 +106,11 @@ public class AnalyzerController {
     @PostMapping("/from-quote/{id}")
     public BaseResponse<CharAnalysisResponse> quoteById(@PathVariable Long id) {
         return BaseResponse.ok(charAnalysisService.analyzeFromQuoteById(id));
+    }
+
+    @PostMapping("/from-quote/batch/{jumlah}")
+    public BaseResponse<List<CharAnalysisResponse>> quoteBatch(
+            @PathVariable @Min(value = 1, message = "Jumlah minimal 1") @Max(value = 10, message = "Jumlah maksimal 10") int jumlah) {
+        return BaseResponse.ok(charAnalysisService.analyzeFromRandomQuoteBatch(jumlah));
     }
 }

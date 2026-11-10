@@ -13,6 +13,7 @@ import com.counter.charcounter.service.CharAnalysisService;
 import com.counter.charcounter.util.CharCounter;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.http.converter.autoconfigure.ClientHttpMessageConvertersCustomizer;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CharAnalysisServiceImpl implements CharAnalysisService {
@@ -105,6 +107,27 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
             throw new QuoteUnavailableException();
         }
         return simpanData(quote.getQuote(), quote.getAuthor());
+    }
+
+    @Override
+    public List<CharAnalysisResponse> analyzeFromRandomQuoteBatch(int length) {
+        List<QuoteResponse> quotes;
+        try {
+            quotes = quoteClient.quoteBatch(length);
+        } catch (FeignException feignException) {
+            throw new QuoteUnavailableException();
+        }
+
+        List<CharAnalysisResponse> result = new ArrayList<>();
+        for (QuoteResponse quote : quotes) {
+            String kalimat = quote.getQuote().trim();
+            if (!charAnalysisRepository.existsByKalimatIgnoreCase(kalimat)) {
+                result.add(simpanData(kalimat, quote.getAuthor()));
+            } else {
+                log.warn("SKIPPED kalimat: " + kalimat + " (Already Exist)");
+            }
+        }
+        return result;
     }
 
     private CharAnalysisResponse simpanData(String kalimat, String author) {

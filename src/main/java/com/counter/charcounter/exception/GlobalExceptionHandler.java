@@ -1,6 +1,8 @@
 package com.counter.charcounter.exception;
 
 import com.counter.charcounter.dto.response.BaseResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,17 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.SERVICE_UNAVAILABLE, quoteUnavailableException.getMessage());
     }
 
+    @ExceptionHandler(AnalysisNotFoundException.class)
+    public ResponseEntity<BaseResponse<Object>> handleNotFound(AnalysisNotFoundException exception){
+        return build(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(AlreadyExistException.class)
+    public ResponseEntity<BaseResponse<Object>> handleAlreadyExist(AlreadyExistException exception) {
+        return build(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    // Thrown when @Valid @RequestBody fails
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BaseResponse<Object>> handleValidation(MethodArgumentNotValidException validException) {
         List<String> message = new ArrayList<>();
@@ -36,14 +49,14 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, String.join(",", message));
     }
 
-    @ExceptionHandler(AnalysisNotFoundException.class)
-    public ResponseEntity<BaseResponse<Object>> handleNotFound(AnalysisNotFoundException exception){
-        return build(HttpStatus.NOT_FOUND, exception.getMessage());
-    }
-
-    @ExceptionHandler(AlreadyExistException.class)
-    public ResponseEntity<BaseResponse<Object>> handleAlreadyExist(AlreadyExistException exception) {
-        return build(HttpStatus.CONFLICT, exception.getMessage());
+    // Thrown when @Validated @PathVariable or @RequestParam
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<BaseResponse<Object>> handleConstraintViolation(ConstraintViolationException constraintViolationException) {
+        List<String> messages = new ArrayList<>();
+        for (ConstraintViolation<?> violation : constraintViolationException.getConstraintViolations()) {
+            messages.add(violation.getMessage());
+        }
+        return build(HttpStatus.BAD_REQUEST, String.join(", ", messages));
     }
 
 }
