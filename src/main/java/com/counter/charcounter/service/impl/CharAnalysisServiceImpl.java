@@ -11,6 +11,8 @@ import com.counter.charcounter.exception.QuoteUnavailableException;
 import com.counter.charcounter.repository.CharAnalysisRepository;
 import com.counter.charcounter.rest.QuoteClient;
 import com.counter.charcounter.service.CharAnalysisService;
+import com.counter.charcounter.service.QuoteAsyncService;
+import com.counter.charcounter.service.RiwayatService;
 import com.counter.charcounter.util.CharCounter;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Slf4j
 @Service
@@ -30,13 +34,16 @@ import java.util.Optional;
 public class CharAnalysisServiceImpl implements CharAnalysisService {
 
     private final CharAnalysisRepository charAnalysisRepository;
-    private final ClientHttpMessageConvertersCustomizer clientConvertersCustomizer;
+    private final QuoteAsyncService quoteAsyncService;
 
     private CharAnalysisResponse toResponse (CharAnalysis data) {
         CharCounter counter = new CharCounter(data.getKalimat());
         return CharAnalysisResponse.from(data, counter.toMap());
     }
+
     private final QuoteClient quoteClient;
+
+    private final RiwayatService riwayatService;
 
     @Override
     public List<CharAnalysisResponse> cari(String kata) {
@@ -151,6 +158,28 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         return result;
     }
 
+    @Override
+    public List<CharAnalysisResponse> analyzeDoubleQuote() {
+        long start = System.currentTimeMillis();
+
+        CompletableFuture<QuoteResponse> quoteOne = quoteAsyncService.getQuote();
+        CompletableFuture<QuoteResponse> quoteTwo = quoteAsyncService.getQuote();
+
+        List<CharAnalysisResponse> result = new ArrayList<>();
+
+        try {
+            QuoteResponse resultQuoteOne = quoteOne.join();
+            QuoteResponse resultQuoteTwo = quoteTwo.join();
+            result.add(simpanData(resultQuoteOne.getQuote(), resultQuoteOne.getAuthor()));
+            result.add(simpanData(resultQuoteTwo.getQuote(), resultQuoteOne.getAuthor()));
+        } catch (CompletionException completionException) {
+            throw new QuoteUnavailableException();
+        }
+        log.info("[{}] dua quote selesai dalam {} ms", Thread.currentThread().getName(), System.currentTimeMillis() - start);
+
+        return result;
+    }
+
     private CharAnalysisResponse simpanData(String kalimat, String author) {
         kalimat = kalimat.trim();
         boolean isAlready = charAnalysisRepository.existsByKalimatIgnoreCase(kalimat);
@@ -167,6 +196,9 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
         data.setCreatedAt(LocalDateTime.now());
 
         CharAnalysis saved = charAnalysisRepository.save(data);
+
+        riwayatService.catatRiwayat(data.getId(), kalimat);
+        log.info("[{}] response dikirim ke client", Thread.currentThread().getName());
 
         return CharAnalysisResponse.from(saved, counter.toMap());
     }

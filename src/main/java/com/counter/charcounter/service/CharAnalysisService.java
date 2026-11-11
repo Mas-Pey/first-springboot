@@ -17,4 +17,7 @@ public interface CharAnalysisService {
     CharAnalysisResponse analyzeFromQuoteById(Long id);
     List<CharAnalysisResponse> analyzeFromRandomQuoteBatch(int length);
     List<CharAnalysisResponse> analyzeFromQuotePagination(int limit, int skip);
+
+    // ASYNC API
+    List<CharAnalysisResponse> analyzeDoubleQuote();
 }

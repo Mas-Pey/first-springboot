@@ -120,4 +120,9 @@ public class AnalyzerController {
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Skip tidak bisa negatif") int skip) {
         return BaseResponse.ok(charAnalysisService.analyzeFromQuotePagination(limit, skip));
     }
+
+    @PostMapping("/from-quote/double")
+    public BaseResponse<List<CharAnalysisResponse>> doubleQuote() {
+        return BaseResponse.ok(charAnalysisService.analyzeDoubleQuote());
+    }
 }
