@@ -16,4 +16,5 @@ public interface CharAnalysisService {
     CharAnalysisResponse analyzeFromQuote();
     CharAnalysisResponse analyzeFromQuoteById(Long id);
     List<CharAnalysisResponse> analyzeFromRandomQuoteBatch(int length);
+    List<CharAnalysisResponse> analyzeFromQuotePagination(int limit, int skip);
 }

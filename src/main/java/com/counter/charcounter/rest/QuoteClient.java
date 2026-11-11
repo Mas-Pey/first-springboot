@@ -1,9 +1,11 @@
 package com.counter.charcounter.rest;
 
+import com.counter.charcounter.dto.feign.QuotePaginationResponse;
 import com.counter.charcounter.dto.feign.QuoteResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -17,4 +19,7 @@ public interface QuoteClient {
 
     @GetMapping("/quotes/random/{length}")
     List<QuoteResponse> quoteBatch(@PathVariable("length") int length);
+
+    @GetMapping("/quotes")
+    QuotePaginationResponse quotePage(@RequestParam("limit") int limit, @RequestParam("skip") int skip);
 }

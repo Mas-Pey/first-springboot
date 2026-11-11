@@ -113,4 +113,11 @@ public class AnalyzerController {
             @PathVariable @Min(value = 1, message = "Jumlah minimal 1") @Max(value = 10, message = "Jumlah maksimal 10") int jumlah) {
         return BaseResponse.ok(charAnalysisService.analyzeFromRandomQuoteBatch(jumlah));
     }
+
+    @PostMapping("/from-quote/page")
+    public BaseResponse<List<CharAnalysisResponse>> quotePage(
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Limit minimal 1") @Max(value = 5, message = "Limit maksimal 5") int limit,
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Skip tidak bisa negatif") int skip) {
+        return BaseResponse.ok(charAnalysisService.analyzeFromQuotePagination(limit, skip));
+    }
 }

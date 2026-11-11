@@ -1,5 +1,6 @@
 package com.counter.charcounter.service.impl;
 
+import com.counter.charcounter.dto.feign.QuotePaginationResponse;
 import com.counter.charcounter.dto.feign.QuoteResponse;
 import com.counter.charcounter.dto.request.CharAnalysisRequest;
 import com.counter.charcounter.dto.response.CharAnalysisResponse;
@@ -120,6 +121,26 @@ public class CharAnalysisServiceImpl implements CharAnalysisService {
 
         List<CharAnalysisResponse> result = new ArrayList<>();
         for (QuoteResponse quote : quotes) {
+            String kalimat = quote.getQuote().trim();
+            if (!charAnalysisRepository.existsByKalimatIgnoreCase(kalimat)) {
+                result.add(simpanData(kalimat, quote.getAuthor()));
+            } else {
+                log.warn("SKIPPED kalimat: " + kalimat + " (Already Exist)");
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<CharAnalysisResponse> analyzeFromQuotePagination(int limit, int skip) {
+        QuotePaginationResponse quotes;
+        try {
+            quotes = quoteClient.quotePage(limit, skip);
+        } catch (FeignException feignException) {
+            throw new QuoteUnavailableException();
+        }
+        List<CharAnalysisResponse> result = new ArrayList<>();
+        for (QuoteResponse quote : quotes.getQuotes()) {
             String kalimat = quote.getQuote().trim();
             if (!charAnalysisRepository.existsByKalimatIgnoreCase(kalimat)) {
                 result.add(simpanData(kalimat, quote.getAuthor()));
