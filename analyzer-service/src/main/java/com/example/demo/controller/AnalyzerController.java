@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/analyzer")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor(onConstructor = @__( @Autowired))
 public class AnalyzerController {
 

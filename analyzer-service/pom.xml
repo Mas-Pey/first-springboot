@@ -47,7 +47,6 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 			<version>5.0.3</version>
-			<scope>compile</scope>
 		</dependency>
 		<!-- BCrypt untuk hash password (hanya modul crypto, bukan Spring Security penuh) -->
 		<dependency>
