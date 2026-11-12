@@ -16,6 +16,16 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(UserAlreadyExistException.class)
+    public ResponseEntity<BaseResponse<Object>> handleUserAlreadyExist(UserAlreadyExistException exception){
+        return build(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<BaseResponse<Object>> handleUnauthorized(UnauthorizedException exception) {
+        return build(HttpStatus.UNAUTHORIZED, exception.getMessage());
+    }
+
     @ExceptionHandler(InvalidPageException.class)
     public ResponseEntity<BaseResponse<Object>> handleInvalidPage(InvalidPageException exception) {
         return build(HttpStatus.BAD_REQUEST, exception.getMessage());

@@ -74,7 +74,7 @@ public class AnalyzerController {
         return BaseResponse.ok(charAnalysisService.analisisHalamanQuote(limit, skip));
     }
 
-    @PostMapping("/from-qoute/double")
+    @PostMapping("/from-quote/double")
     public BaseResponse<List<CharAnalysisResponse>> fromDoubleQuote() {
         return BaseResponse.ok(charAnalysisService.analysisDoubleQuote());
     }

@@ -1,9 +1,11 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /quote
+
 spring:
   application:
     name: quote-service
-
-server:
-  port: 8082
 
 eureka:
   client:
