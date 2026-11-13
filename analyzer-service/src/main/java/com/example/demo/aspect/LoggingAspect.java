@@ -14,6 +14,7 @@ import java.util.Arrays;
 @Aspect
 @Component
 public class LoggingAspect {
+
     @Around("execution(* com.example.demo.service..*.*(..))")
     public Object logWaktu(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().toShortString();
@@ -28,8 +29,7 @@ public class LoggingAspect {
     }
 
     @AfterThrowing(pointcut = "execution(* com.example.demo.service..*.*(..))", throwing = "exception")
-    public void logEror(JoinPoint joinPoint, Exception exception) {
+    public void logError(JoinPoint joinPoint, Exception exception) {
         log.error("Error di {}: {}", joinPoint.getSignature().toShortString(), exception.getMessage());
     }
-
 }

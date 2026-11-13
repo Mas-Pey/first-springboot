@@ -11,3 +11,6 @@ target/
 
 # macOS
 .DS_Store
+
+# JVM crash log
+hs_err_pid*.log

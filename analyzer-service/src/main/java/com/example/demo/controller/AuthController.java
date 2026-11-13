@@ -16,19 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthController {
+
     private final AuthService authService;
 
     @PostMapping("/register")
     public BaseResponse<String> register(
-            @Valid @RequestBody AuthRequestDto authRequestDto
-    ){
+            @Valid
+            @RequestBody
+            AuthRequestDto authRequestDto) {
         return BaseResponse.ok(authService.register(authRequestDto));
     }
 
     @PostMapping("/login")
     public BaseResponse<AuthResponseDto> login(
-            @Valid @RequestBody AuthRequestDto authRequestDto
-    ){
+            @Valid
+            @RequestBody
+            AuthRequestDto authRequestDto) {
         return BaseResponse.ok(authService.login(authRequestDto));
     }
 }

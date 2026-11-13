@@ -11,17 +11,18 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
+
     @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.expiration}")
-    private Long expiration;
+    private long expiration;
 
-    private SecretKey secretKey(){
+    private SecretKey secretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String username){
+    public String generateToken(String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
@@ -30,7 +31,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String getUsername(String token){
+    public String getUsername(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey())
                 .build()

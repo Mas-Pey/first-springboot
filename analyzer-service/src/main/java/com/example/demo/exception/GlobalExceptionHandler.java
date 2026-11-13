@@ -17,12 +17,12 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistException.class)
-    public ResponseEntity<BaseResponse<Object>> handleUserAlreadyExist(UserAlreadyExistException exception){
+    public ResponseEntity<BaseResponse<Object>> handleUserAlreadyExist(UserAlreadyExistException exception) {
         return build(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<BaseResponse<Object>> handleUnauthorized(UnauthorizedException exception) {
+    @ExceptionHandler(UnauthrorizedException.class)
+    public ResponseEntity<BaseResponse<Object>> handleUnauthorized(UnauthrorizedException exception) {
         return build(HttpStatus.UNAUTHORIZED, exception.getMessage());
     }
 

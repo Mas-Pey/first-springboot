@@ -1,0 +1,21 @@
+services:
+  redis-batch19:
+    image: redis:7
+    container_name: redis-batch19
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+  # UI untuk melihat isi Redis: http://localhost:5540
+  # Tambah koneksi dengan host: redis-batch19, port: 6379
+  redis-insight-batch19:
+    image: redis/redisinsight:latest
+    container_name: redis-insight-batch19
+    restart: always
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis-batch19
+
+#  docker compose -f docker-compose-redis.yaml up -d
