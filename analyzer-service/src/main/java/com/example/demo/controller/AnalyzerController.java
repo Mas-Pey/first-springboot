@@ -29,10 +29,10 @@ public class AnalyzerController {
 
     @PostMapping
     public BaseResponse<CharAnalysisResponse> analisis(
-            @Valid
-            @RequestBody CharAnalysisRequest request,
-            @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
-        log.info("X-Request-Id: {}, kalimat: {}", requestId, request.getKalimat());
+            @Valid @RequestBody CharAnalysisRequest request,
+            @RequestHeader(value = "X-Request-Id", required = false) String requestId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+        log.info("X-Request-Id: {}, user: {}, kalimat: {}", requestId, userId, request.getKalimat());
         return BaseResponse.ok(charAnalysisService.analisis(request));
     }
 
